@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.time.Instant;
 
 @Getter
-public class BlogContentDto {
+public class BlogDto {
 
     private long id;
     private String title;
@@ -17,7 +17,7 @@ public class BlogContentDto {
     private Boolean isEdited;
    
 
-    public BlogContentDto(long id, String title,  String photo, String content, Instant date, Boolean isEdited){
+    public BlogDto(long id, String title,  String photo, String content, Instant date, Boolean isEdited){
         this.id = id;
         this.title = title;
         this.photo = photo;

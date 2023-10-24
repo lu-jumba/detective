@@ -2,7 +2,7 @@ package com.example.detective.service;
 
 import com.example.detective.handler.Response;
 import com.example.detective.handler.ServiceStatus;
-import com.example.detective.dto.BlogContentDto;
+import com.example.detective.dto.BlogDto;
 import com.example.detective.entities.Blog;
 import com.example.detective.repository.BlogRepository;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +96,7 @@ public class BlogService {
             return new Response(null, ServiceStatus.POST_NOT_FOUND);
         }
         else if(blog.isPresent()){
-            BlogContentDto blogContent = blogRepository.findContent(blog.get());
+            BlogDto blogContent = blogRepository.findContent(blog.get());
 
             return new Response(blogContent, ServiceStatus.SUCCESS);
         }

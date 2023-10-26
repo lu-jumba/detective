@@ -1,13 +1,9 @@
 package com.example.detective.service;
 
-import com.example.detective.Utility.EmailUtility;
-
-//import com.example.BonSai.dto.ContractDto;
-
 import com.example.detective.Utility.Hashing;
-import com.example.detective.controller.OtpController;
+//import com.example.detective.controller.OtpController;
 import com.example.detective.entities.Incident;
-import com.example.detective.entities.Otp;
+//import com.example.detective.entities.Otp;
 import com.example.detective.entities.User;
 import com.example.detective.enums.Roles;
 import com.example.detective.handler.Response;
@@ -57,8 +53,8 @@ public class UserService {
     //@Autowired
 	//private EmailService emailService;
 
-    @Autowired
-	private OtpController otpController;
+    //@Autowired
+	//private OtpController otpController;
 
 
     //@PreAuthorize("hasRole('USER') or hasRole('SUPERADMIN')")
@@ -76,6 +72,8 @@ public class UserService {
         user.setPassword(Hashing.getHashValue(u.getPassword()));
         user.setCity(u.getCity());
         user.setPhoneNumber(u.getPhoneNumber());
+        user.setBalance(0);
+        user.setFreedoms(0);
         user.setDate(u.getDate());
         user.setRoles(Roles.USER);
         user.setIncidents(u.getIncidents());
@@ -134,7 +132,7 @@ public class UserService {
         return new Response(incidents, ServiceStatus.SUCCESS);
     }
 
-    public Response authUser(String username, String password, Otp otp) {
+    public Response authUser(String username, String password) {
 
 
         User user = userRepository.findByUsername(username);
@@ -147,9 +145,9 @@ public class UserService {
         }
 
         else {
-            //authenticated = user.getPassword().equals(password);
+            authenticated = user.getPassword().equals(password);
 
-            if (user.getPassword().equals(password)){
+            /*if (user.getPassword().equals(password)){
                 
                //create otp
                 otp =  otpController.getOTP(null);
@@ -168,7 +166,7 @@ public class UserService {
                     authenticated = true;
                 }
                 throw new Error("OTP is Incorrect");
-            }
+            }*/
         }
 
         return new Response(authenticated, ServiceStatus.SUCCESS);

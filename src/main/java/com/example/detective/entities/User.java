@@ -78,10 +78,20 @@ public class User implements Serializable {
     @Field(store = Store.YES)
     private String phoneNumber;
 
-    @JsonProperty(access = Access.WRITE_ONLY)
-    @Size(min = 8, max = 32, message = "Password must be between 8 and 32 characters")
+    @NotNull
+    //@Size(min = 10, max = 10, message = "Phone Number must be only 10 digits!!")
     @Field(store = Store.YES)
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character")
+    private float balance;
+
+    @NotNull
+    //@Size(min = 10, max = 10, message = "Phone Number must be only 10 digits!!")
+    @Field(store = Store.YES)
+    private float freedoms;
+
+    @JsonProperty(access = Access.WRITE_ONLY)
+    //@Size(min = 8, max = 32, message = "Password must be between 8 and 32 characters")
+    @Field(store = Store.YES)
+    //@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character")
     @Column(name = "password")
     private String password;
     
@@ -90,9 +100,9 @@ public class User implements Serializable {
    @Column(name = "roles")
    private Roles roles;
 
-   @Field(store = Store.YES)
+  /* @Field(store = Store.YES)
    @Column(name = "otp")
-   private Otp otp;
+   private Otp otp;*/
 
    
    
@@ -156,13 +166,29 @@ public class User implements Serializable {
         public void setPhoneNumber(String phoneNumber){
        this.phoneNumber = phoneNumber;
    }
-   public Otp getOtp() {
+
+   public float getBalance() {
+    return balance;
+}
+
+    
+    public void setBalance(float balance){
+   this.balance = balance;
+}
+
+public float getFreedoms() {
+    return freedoms;
+}
+    public void setFreedoms(float freedoms){
+   this.freedoms = freedoms;
+}
+   /*public Otp getOtp() {
     return otp;
 }
 
 public void setOtp(Otp otp) {
     this.otp = otp;
-}
+}*/
 public List<Incident> getIncidents() {
     return incidents;
 }

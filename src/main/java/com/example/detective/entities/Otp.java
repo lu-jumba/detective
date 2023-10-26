@@ -1,4 +1,4 @@
-package com.example.detective.entities;
+/*package com.example.detective.entities;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -17,4 +17,4 @@ public class Otp {
 	private Integer id;
 	private Integer code;
 	private Date expires;
-}
+}*/

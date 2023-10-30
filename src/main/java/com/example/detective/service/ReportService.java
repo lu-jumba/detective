@@ -9,6 +9,7 @@ import com.example.detective.enums.Roles;
 import com.example.detective.handler.Response;
 import com.example.detective.handler.ServiceStatus;
 import com.example.detective.repository.SupportOrderRepository;
+import com.example.detective.repository.UserRepository;
 import com.example.detective.repository.ReportRepository;
 import com.example.detective.repository.IncidentRepository;
 
@@ -26,9 +27,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Transactional
 @RequiredArgsConstructor
 public class ReportService {
-     private final ReportRepository reportRepository;
-        private final IncidentRepository incidentRepository;
-        private final SupportOrderRepository followupOrderRepository;
+    private final ReportRepository reportRepository;
+    private final IncidentRepository incidentRepository;
+    private final SupportOrderRepository followupOrderRepository;
+    private final UserRepository userRepository;
+
 
 
     @PreAuthorize("hasRoles('DETECIVES') or hasRoles('SUPERADMIN')")
@@ -162,8 +165,30 @@ public Response processReport(String incidentUuid, ReportStatus status) {
                   throw new Error("Could not retrieve incident.");
               }   
 
+              
+              //in.getUsername();
+              //get user
+              User u = incidentRepository.findUserByUsername( in.getUsername());
+              float balance = u.getBalance();
+              float freedoms = u.getFreedoms();
+
+              //set fees and awarded freedoms
+              float fees = reportable;
+              float rewardedFreedoms = 1/1000;
+              
+              //ensure user has enough balance
+              if (balance<fees){
+                throw new Error("insufficient balance");
+              }
+
+              //update user's balance and freedoms
+              u.setBalance(balance-fees);
+              u.setFreedoms(freedoms + rewardedFreedoms);
+
+              //Persist user
+              userRepository.save(u);
+
               // Persist incident
-              in.getUsername();
 
               incidentRepository.save(in);
           }   
@@ -181,9 +206,30 @@ public Response processReport(String incidentUuid, ReportStatus status) {
               }
               in.setVerified(true);
               
-              // Persist incident
-              in.getUsername();
+              
+              //in.getUsername();
+              //get user
+              User u = incidentRepository.findUserByUsername( in.getUsername());
+              float balance = u.getBalance();
+              float freedoms = u.getFreedoms();
 
+              //set fees and awarded freedoms
+              float fees = verifiable;
+              float rewardedFreedoms = 1/1000;
+              
+              //ensure user has enough balance
+              if (balance<fees){
+                throw new Error("insufficient balance");
+              }
+
+              //update user's balance and freedoms
+              u.setBalance(balance-fees);
+              u.setFreedoms(freedoms + rewardedFreedoms);
+
+              //Persist user
+              userRepository.save(u);
+
+              // Persist incident
               incidentRepository.save(in);
           }   
 

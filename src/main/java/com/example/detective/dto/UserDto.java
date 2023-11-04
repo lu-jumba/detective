@@ -1,7 +1,7 @@
 package com.example.detective.dto;
 
 import com.example.detective.entities.Incident;
-//import com.example.detective.entities.Otp;
+import com.example.detective.entities.Otp;
 import com.example.detective.enums.Roles;
 import java.util.List;
 import lombok.Getter;
@@ -12,7 +12,7 @@ public class UserDto {
     private Long userId;
     private String username;
     private String password;
-    //private Otp otp;
+    private Otp otp;
     private String firstName;
     private String lastName;
     private String city;
@@ -95,13 +95,13 @@ public class UserDto {
         public void setFreedoms(float freedoms){
        this.freedoms = freedoms;
    }
-   /*public Otp getOtp() {
+   public Otp getOtp() {
     return otp;
 }
 
 public void setOtp(Otp otp) {
     this.otp = otp;
-}*/
+}
 public List<Incident> getIncidents() {
     return incidents;
 }
@@ -118,7 +118,7 @@ public List<Incident> getIncidents() {
    }
     
     public UserDto(Long userId, String username, String password, String firstName, String lastName, String city, 
-    String phoneNumber, float balance, float freedoms, /*Otp otp,*/ List<Incident> incidents, Roles roles) {
+    String phoneNumber, float balance, float freedoms, Otp otp, List<Incident> incidents, Roles roles) {
         this.userId = userId;    
         this.username = username;
         this.password = password;
@@ -128,7 +128,7 @@ public List<Incident> getIncidents() {
         this.phoneNumber = phoneNumber;
         this.balance = balance;
         this.freedoms = freedoms;
-        //this.otp = otp;
+        this.otp = otp;
         this.incidents = incidents;
         this.roles = roles;
 	}

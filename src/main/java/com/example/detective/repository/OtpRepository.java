@@ -1,4 +1,4 @@
-/*package com.example.detective.repository;
+package com.example.detective.repository;
 
 import java.util.Date;
 import java.util.Optional;
@@ -12,4 +12,4 @@ public interface OtpRepository extends JpaRepository <Otp,Integer> {
 	public Iterable<Otp> findByExpiresLessThanEqual(Date expires);
 
 	public Optional<Otp> findByIdAndCode(Integer id, Integer code);
-}*/
+}

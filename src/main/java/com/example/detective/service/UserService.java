@@ -1,9 +1,9 @@
 package com.example.detective.service;
 
 import com.example.detective.Utility.Hashing;
-//import com.example.detective.controller.OtpController;
+import com.example.detective.controller.OtpController;
 import com.example.detective.entities.Incident;
-//import com.example.detective.entities.Otp;
+import com.example.detective.entities.Otp;
 import com.example.detective.entities.User;
 import com.example.detective.enums.Roles;
 import com.example.detective.handler.Response;
@@ -53,8 +53,8 @@ public class UserService {
     //@Autowired
 	//private EmailService emailService;
 
-    //@Autowired
-	//private OtpController otpController;
+    @Autowired
+	private OtpController otpController;
 
 
     //@PreAuthorize("hasRole('USER') or hasRole('SUPERADMIN')")
@@ -132,7 +132,7 @@ public class UserService {
         return new Response(incidents, ServiceStatus.SUCCESS);
     }
 
-    public Response authUser(String username, String password) {
+    public Response authUser(String username, String password, Otp otp) {
 
 
         User user = userRepository.findByUsername(username);
@@ -145,9 +145,9 @@ public class UserService {
         }
 
         else {
-            authenticated = user.getPassword().equals(password);
+            //authenticated = user.getPassword().equals(password);
 
-            /*if (user.getPassword().equals(password)){
+            if (user.getPassword().equals(password)){
                 
                //create otp
                 otp =  otpController.getOTP(null);
@@ -161,12 +161,13 @@ public class UserService {
                 //verify otp
                 otpController.verifyOTP(otp);
                 
-                if (user.getOtp() == otp) {
+                /*if (user.getOtp() == otp) {
 
                     authenticated = true;
                 }
-                throw new Error("OTP is Incorrect");
-            }*/
+                throw new Error("OTP is Incorrect");*/
+                authenticated = user.getOtp().equals(otp);
+            }
         }
 
         return new Response(authenticated, ServiceStatus.SUCCESS);

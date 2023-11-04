@@ -3,7 +3,7 @@ package com.example.detective.service;
 import com.example.detective.handler.Response;
 import com.example.detective.handler.ServiceStatus;
 import com.example.detective.dto.MainBlogDto;
-import com.example.detective.entities.Blog;
+//import com.example.detective.entities.Blog;
 import com.example.detective.repository.MainRepository;
 import com.example.detective.repository.BlogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +11,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.security.Principal;
+//import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
+//import java.util.Optional;
 
 @Service
 @Transactional

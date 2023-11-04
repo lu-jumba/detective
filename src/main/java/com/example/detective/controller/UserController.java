@@ -3,7 +3,7 @@ package com.example.detective.controller;
 
 
 import com.example.detective.entities.Incident;
-//import com.example.detective.entities.Otp;
+import com.example.detective.entities.Otp;
 import com.example.detective.entities.User;
 import com.example.detective.handler.Response;
 import com.example.detective.service.UserService;
@@ -58,8 +58,8 @@ public class UserController {
     }
     
     @GetMapping("/username/authUser")
-    public ResponseEntity authUser(@PathVariable("username") String username, String password){
-        Response response = userService.authUser(username, password);
+    public ResponseEntity authUser(@PathVariable("username") String username, String password, Otp otp){
+        Response response = userService.authUser(username, password, otp);
 
         return switch (response.getCode()) {
             case 0 -> new ResponseEntity(response, HttpStatus.OK);

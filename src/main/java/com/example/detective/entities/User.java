@@ -100,9 +100,9 @@ public class User implements Serializable {
    @Column(name = "roles")
    private Roles roles;
 
-  /* @Field(store = Store.YES)
+  @Field(store = Store.YES)
    @Column(name = "otp")
-   private Otp otp;*/
+   private Otp otp;
 
    
    
@@ -182,13 +182,13 @@ public float getFreedoms() {
     public void setFreedoms(float freedoms){
    this.freedoms = freedoms;
 }
-   /*public Otp getOtp() {
+   public Otp getOtp() {
     return otp;
 }
 
 public void setOtp(Otp otp) {
     this.otp = otp;
-}*/
+}
 public List<Incident> getIncidents() {
     return incidents;
 }

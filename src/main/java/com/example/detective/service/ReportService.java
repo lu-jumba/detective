@@ -5,7 +5,6 @@ import com.example.detective.entities.Report;
 import com.example.detective.entities.Incident;
 import com.example.detective.entities.User;
 import com.example.detective.enums.ReportStatus;
-import com.example.detective.enums.Roles;
 import com.example.detective.handler.Response;
 import com.example.detective.handler.ServiceStatus;
 import com.example.detective.repository.SupportOrderRepository;
@@ -35,19 +34,19 @@ public class ReportService {
 
 
     @PreAuthorize("hasRoles('DETECIVES') or hasRoles('SUPERADMIN')")
-        public Response reportIncident(Report r) {
+        public Response <Incident> reportIncident(Report r) {
         Incident ic = reportRepository.findByUuid(r.getIncidentUuid());
         if(ic == null){
-            return null;
+            return new Response<>(null, ServiceStatus.INCIDENT_NOT_FOUND);
         }
            
 
-       return new Response(ic, ServiceStatus.SUCCESS);
+       return new Response<>(ic, ServiceStatus.SUCCESS);
         
     }
         
     @PreAuthorize("hasRoles('DETECTIVES') or hasRoles('SUPERADMIN')")
-    public Response reports(String incidentUuid, ReportStatus status) {
+    public Response <ArrayList<Report>> reports(String incidentUuid, ReportStatus status) {
         
        Report report = reportRepository.findByIncidentUuid(incidentUuid);
 
@@ -55,16 +54,16 @@ public class ReportService {
         // Skip the processing of the result, if the status
         // does not equal the query status; list all, if unknown
         if(report.getStatus() != status && status != ReportStatus.UNKNOWN) {
-            return null;
+            return new Response<>(null, ServiceStatus.INVALID_REPORT_STATUS);
                    }
         ArrayList<Report> reports = (ArrayList<Report>) reportRepository.findAll();
-            return new Response(reports, ServiceStatus.SUCCESS);  
+            return new Response <>(reports, ServiceStatus.SUCCESS);  
 
 
 }
 
 @PreAuthorize("hasRoles('USER')")
-public Response fileReport(User user, String incidentUuid) {
+public Response <Integer> fileReport(User user, String incidentUuid) {
     
     Report report = new Report();
     report.setStatus(ReportStatus.NEW);
@@ -72,7 +71,7 @@ public Response fileReport(User user, String incidentUuid) {
 // Check if the case exists
 Incident ic = reportRepository.findByUuid(report.getIncidentUuid());
 	if (ic == null) {
-		throw new Error("Incident could not be found.");
+        return new Response<>(null, ServiceStatus.INCIDENT_NOT_FOUND);
 	}
 
 	// Persist the report
@@ -86,21 +85,21 @@ Incident ic = reportRepository.findByUuid(report.getIncidentUuid());
 	ic.setReports(Arrays.asList(report));
 
     ic.getUsername();
-    report.getIncidentUuid();
+    //report.getIncidentUuid();
     
     incidentRepository.save(ic);
 
-    return new Response(0,ServiceStatus.SUCCESS);  
+    return new Response <> (0,ServiceStatus.SUCCESS);  
 
 }
 
 @PreAuthorize("hasRoles('DETECTIVES') or hasRoles('SUPERADMIN')")
-public Response processReport(String incidentUuid, ReportStatus status) {   
+public Response <Report> processReport(String incidentUuid, ReportStatus status) {   
     
     Report report = reportRepository.findByIncidentUuid(incidentUuid);
 
     if(report.getIncidentUuid()== null) {
-        throw new Error("Report cannot be found.");
+        return new Response<>(null, ServiceStatus.REPORT_NOT_FOUND);
       }
     Incident ic = reportRepository.findByUuid(report.getIncidentUuid());
     report.getIncidentUuid();
@@ -110,30 +109,30 @@ public Response processReport(String incidentUuid, ReportStatus status) {
     ic.getUuid();
     
     if((!report.isReporting() || !report.isInvestigator()) && report.getStatus() != ReportStatus.NEW) {
-      throw new Error("Cannot change the status of a non-new report.");
+      return new Response<>(null, ServiceStatus.CHANGE_NOT_ALLOWED);
     }
     if((report.isReporting() || report.isInvestigator()) && report.getStatus() == ReportStatus.NEW) {
-      throw new Error("Reporting or Investigator must first be confirmed by the detectives.");
+      return new Response<>(null, ServiceStatus.UNCOFIRMED );
     }
 
   
     report.setStatus(status); // Assigning requested status
     switch(status) {
       case SUPPORT -> {
-          if(report.isReporting() || report.isInvestigator()) {
-              throw new Error("Cannot follow up first time reports.");
+          if(report.isReporting() /*|| report.isInvestigator()*/) {
+              return new Response<>(null, ServiceStatus.REPORT_ERROR);
           }
           report.setReportable(0);
 
           if(report.isInvestigator()) {
-              throw new Error("Cannot follow up first time reports.");
+            return new Response<>(null, ServiceStatus.REPORT_ERROR);
           }
 
           report.setVerifiable(0); 
           
           Incident i = reportRepository.findByUuid(report.getIncidentUuid());
           if(i == null) {
-              throw new Error("Could not retrieve incident.");
+              return new Response<>(null, ServiceStatus.INCIDENT_ERROR);
           }
 
           // Create new follow up order.
@@ -162,10 +161,10 @@ public Response processReport(String incidentUuid, ReportStatus status) {
           if(report.isReporting()) {
               Incident in = reportRepository.findByIncidentTypeUuid(report.getIncidentUuid());
               if(in == null) {
-                  throw new Error("Could not retrieve incident.");
+                  return new Response<>(null, ServiceStatus.INCIDENT_ERROR);
               }   
 
-              
+              //find user of in
               //in.getUsername();
               //get user
               User u = incidentRepository.findUserByUsername( in.getUsername());
@@ -178,7 +177,7 @@ public Response processReport(String incidentUuid, ReportStatus status) {
               
               //ensure user has enough balance
               if (balance<fees){
-                throw new Error("insufficient balance");
+                return new Response<>(null, ServiceStatus.LOW_BALANCE);
               }
 
               //update user's balance and freedoms
@@ -202,7 +201,7 @@ public Response processReport(String incidentUuid, ReportStatus status) {
           if(report.isInvestigator()) {
               Incident in = reportRepository.findByIncidentTypeUuid(report.getIncidentUuid());
               if(in == null) {
-                  throw new Error("Could not retrieve incident.");
+                return new Response<>(null, ServiceStatus.INCIDENT_ERROR);
               }
               in.setVerified(true);
               
@@ -219,7 +218,7 @@ public Response processReport(String incidentUuid, ReportStatus status) {
               
               //ensure user has enough balance
               if (balance<fees){
-                throw new Error("insufficient balance");
+                return new Response<>(null, ServiceStatus.LOW_BALANCE);
               }
 
               //update user's balance and freedoms
@@ -248,7 +247,7 @@ public Response processReport(String incidentUuid, ReportStatus status) {
       }
   
       default -> {
-          throw new Error("Unknown status change.");
+        return new Response<>(null, ServiceStatus.STATUS_ERROR);
             }
     }
     
@@ -258,25 +257,26 @@ public Response processReport(String incidentUuid, ReportStatus status) {
 
     Report savedReport = reportRepository.save(report);
 
-    return new Response(savedReport, ServiceStatus.SUCCESS);
+    return new Response <> (savedReport, ServiceStatus.SUCCESS);
   
   }
 
 @PreAuthorize("hasRoles('INVESTIGATOR') or hasRoles('SUPERADMIN')")
-  public Response listReportingReports(String incidentUuid, ReportStatus status) {
+  public Response <List<Report>> listReportingReports(String incidentUuid, ReportStatus status) {
     Report report = reportRepository.findByIncidentUuid(incidentUuid);
     
     
     
     //Filter out the irrelevant reports
     if (!report.isReporting() || report.getStatus() != ReportStatus.NEW) {
-        return null;
-        }
+        //return null;
+        return new Response<>(new ArrayList<>(), ServiceStatus.REPORT_NOT_FOUND);
+    }
     
     Incident in = reportRepository.findByUuid(report.getIncidentUuid());
     
     if (in == null) {
-        throw new Error("Error acquiring incidents.");
+        return new Response<>(null, ServiceStatus.ERROR);
         }
     
     in.getUuid();
@@ -287,7 +287,7 @@ public Response processReport(String incidentUuid, ReportStatus status) {
     User user = incidentRepository.findUserByUsername(in.getUsername());
     
     if (user == null) {
-        throw new Error("Error acquiring user.");
+        return new Response<>(null, ServiceStatus.ERROR);
         }
     
     in.getInfo();
@@ -296,24 +296,24 @@ public Response processReport(String incidentUuid, ReportStatus status) {
     user.getLastName();
     
     List<Report> reports = reportRepository.findReportByReporting (report, Sort.by(Sort.Direction.DESC, "isReporting"));
-    return new Response(reports, ServiceStatus.SUCCESS);
+    return new Response <>(reports, ServiceStatus.SUCCESS);
 }
 
 @PreAuthorize("hasRoles('INVESTIGATOR') or hasRoles('SUPERADMIN')")
-  public Response listInvestigatorReports(String incidentUuid, ReportStatus status) {
+  public Response <List<Report>> listInvestigatorReports(String incidentUuid, ReportStatus status) {
     Report report = reportRepository.findByIncidentUuid(incidentUuid);
     
     
     
     //Filter out the irrelevant reports
     if (!report.isInvestigator() || report.getStatus() != ReportStatus.NEW) {
-        return null;
+        return new Response<>(new ArrayList<>(), ServiceStatus.REPORT_NOT_FOUND);
         }
     
     Incident in = reportRepository.findByUuid(report.getIncidentUuid());
     
     if (in == null) {
-        throw new Error("Error acquiring incidents.");
+        return new Response<>(null, ServiceStatus.ERROR);
         }
     
     in.getUuid();
@@ -324,7 +324,7 @@ public Response processReport(String incidentUuid, ReportStatus status) {
     User user = incidentRepository.findUserByUsername(in.getUsername());
     
     if (user == null) {
-        throw new Error("Error acquiring user.");
+        return new Response<>(null, ServiceStatus.ERROR);
         }
     
     in.getInfo();
@@ -333,20 +333,20 @@ public Response processReport(String incidentUuid, ReportStatus status) {
     user.getLastName();
     
     List<Report> reports = reportRepository.findReportByInvestigator (report, Sort.by(Sort.Direction.DESC, "isInvestigator"));
-    return new Response(reports, ServiceStatus.SUCCESS);
+    return new Response<>(reports, ServiceStatus.SUCCESS);
 }
 
 @PreAuthorize("hasRoles('INVESTIGATOR') or hasRoles('SUPERADMIN')")
-public Response processReportingReport(String incidentUuid, ReportStatus status, String fileReference) {
+public Response <Report> processReportingReport(String incidentUuid, ReportStatus status, String fileReference) {
     
     Report report = reportRepository.findByIncidentUuid(incidentUuid);
     
     if (report.getIncidentUuid()== null) {
-        throw new Error("report cannot be found.");
+        return new Response<>(null, ServiceStatus.REPORT_NOT_FOUND);
         }
     
    if (!report.isReporting() && report.getStatus() != ReportStatus.NEW) {
-        throw new Error("report is either not completed or has invalid status.");
+    return new Response<>(null, ServiceStatus.REPORT_INCOMPLETE);
         }
     else if (report.isReporting()) {
         report.setStatus(ReportStatus.CONFIRMED);
@@ -357,20 +357,20 @@ public Response processReportingReport(String incidentUuid, ReportStatus status,
 
     Report savedReport = reportRepository.save(report);
 
-	return new Response(savedReport, ServiceStatus.SUCCESS); 
+	return new Response <> (savedReport, ServiceStatus.SUCCESS); 
 }
 
 @PreAuthorize("hasRoles('INVESTIGATOR') or hasRoles('SUPERADMIN')")
-public Response processInvestigatorReport(String incidentUuid, ReportStatus status, String fileReference) {
+public Response <Report> processInvestigatorReport(String incidentUuid, ReportStatus status, String fileReference) {
     
     Report report = reportRepository.findByIncidentUuid(incidentUuid);
     
     if (report.getIncidentUuid()== null) {
-        throw new Error("report cannot be found.");
+        return new Response<>(null, ServiceStatus.REPORT_NOT_FOUND);
         }
     
    if (!report.isInvestigator() && report.getStatus() != ReportStatus.NEW) {
-        throw new Error("report is either not related to investigator verification or has invalid status.");
+        return new Response<>(null, ServiceStatus.REPORT_INCOMPLETE);
         }
     else if (report.isInvestigator()) {
         report.setStatus(ReportStatus.CONFIRMED);
@@ -381,6 +381,6 @@ public Response processInvestigatorReport(String incidentUuid, ReportStatus stat
 
     Report savedReport = reportRepository.save(report);
 
-	return new Response(savedReport, ServiceStatus.SUCCESS); 
+	return new Response <>(savedReport, ServiceStatus.SUCCESS); 
 }
 }

@@ -1,9 +1,13 @@
 package com.example.detective.controller;
 
 
+
 import com.example.detective.entities.IncidentType;
 import com.example.detective.handler.Response;
 import com.example.detective.service.IncidentTypeService;
+
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,31 +21,36 @@ public class IncidentTypeController {
     IncidentTypeService incidentTypeService;
 
     @PostMapping ("/createIncidentType")
-    public ResponseEntity createIncidentType(@RequestBody IncidentType incidentType){
-        Response response = incidentTypeService.createIncidentType(incidentType);
+    public ResponseEntity <Response <IncidentType>> createIncidentType(@RequestBody IncidentType incidentType){
+        Response <IncidentType> response = incidentTypeService.createIncidentType(incidentType);
 
         return switch (response.getCode()) {
-            case 0 -> new ResponseEntity(response, HttpStatus.OK);
-            case 101 -> new ResponseEntity(response, HttpStatus.CONFLICT);
-            default -> new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            case 0 -> new ResponseEntity<>(response, HttpStatus.OK);
+            case 101 -> new ResponseEntity<>(response, HttpStatus.CONFLICT);
+            case 102 -> new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            default -> new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         };
     }
 
     @GetMapping("/uuid/incidentTypes")
-    public ResponseEntity incidentTypes(@PathVariable("uuid") IncidentType incidentType, String uuid){
-        return new ResponseEntity(incidentTypeService.incidentTypes(incidentType, uuid), HttpStatus.OK);
+    public ResponseEntity <Response<ArrayList<IncidentType>>> incidentTypes(@PathVariable("uuid") String uuid,
+     @RequestParam IncidentType incidentType){
+        Response<ArrayList<IncidentType>> response = incidentTypeService.incidentTypes(uuid, incidentType);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        
     }
 
 
     @PutMapping ("/setActiveIncidentType")
-    public ResponseEntity setActiveIncidentType(@RequestBody String uuid, boolean active){
-        Response response = incidentTypeService.setActiveIncidentType(uuid, active);
+    public ResponseEntity <Response<IncidentType>> setActiveIncidentType(@RequestBody String uuid, boolean active){
+       
+        Response<IncidentType> response = incidentTypeService.setActiveIncidentType(uuid, active);
 
         return switch (response.getCode()) {
-            case 0 -> new ResponseEntity(response, HttpStatus.OK);
-            case 101 -> new ResponseEntity(response, HttpStatus.CONFLICT);
-            case 102 -> new ResponseEntity(response, HttpStatus.NOT_FOUND);
-            default -> new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            case 0 -> new ResponseEntity<>(response, HttpStatus.OK);
+            case 101 -> new ResponseEntity<>(response, HttpStatus.CONFLICT);
+            case 102 -> new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            default -> new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         };
     }
     

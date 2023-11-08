@@ -21,8 +21,8 @@ public interface IncidentRepository extends JpaRepository<Incident, String> {
     @Query("SELECT u FROM User u WHERE u.username = ?1")
     User findByUsername(String username);
 
-    @Query("SELECT r FROM Report r WHERE r.case = ?1")
-    List<Report> findReportsByIncident(Incident ic);
+    @Query("SELECT r FROM Report r WHERE r.incident = ?1")
+    List<Report> findReportsByIncident(List<Report> list);
 
     @Query("SELECT i FROM I i WHERE i.incidentTypeUuid = ?1")
    Incident findByIncidentTypeUuid(String incidentTypeUuid);

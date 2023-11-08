@@ -29,46 +29,21 @@ public class IncidentService {
     private final IncidentRepository incidentRepository;
     private final UserRepository userRepository;
     
-    public Response createIncident(Incident i, User user) throws NoSuchAlgorithmException {
-                
-                // Create new user if necessary
-                User u = new User();
-                boolean requestUserCreate = (u.getUsername().contains("username") && u.getPassword().contains("password")); //check later
-                u.getUsername();
-                if (requestUserCreate) {
-                    // Check if a user with the same username exists
-                    if(u.getUsername().isEmpty()) {
-                        // Create new user
-                        user.setUserId(Long.MIN_VALUE);
-                        user.setUsername(u.getUsername());
-                        user.setFirstName(u.getFirstName());
-                        user.setLastName(u.getLastName());
-                        user.setPassword(Hashing.getHashValue(u.getPassword()));
-                        user.setCity(u.getCity());
-                        user.setPhoneNumber(u.getPhoneNumber());
-                        user.setDate(u.getDate());
-                        user.setRoles(Roles.USER);
-                        user.setIncidents(u.getIncidents());
-                        
-                        
-                        
-                        // Persist the new user
-                        userRepository.save(u);
-                    } 
-                    else{// Parse the existing user
-                        u = incidentRepository.findByUsername(i.getUsername());
-                    }
-                } 
+    public Response <Integer> createIncident(Incident i, User user) throws NoSuchAlgorithmException {
 
-                else {// Validate if the user with the provided username exists
-                    User existingUser = incidentRepository.findByUsername(i.getUsername());
+        if (requestUserCreate(user)) {
+            // Create or retrieve the user
+            User existingUser = createUserIfNotExists(user);
+            i.setUsername(existingUser.getUsername());
+        } else {
+            // Validate if the user with the provided username exists
+            User existingUser = userRepository.findByUsername(i.getUsername());
+            if (existingUser == null) {
+                return new Response <> (null, ServiceStatus.USER_DOES_NOT_EXIST);
+            }
+        }
 
-                    if (existingUser.getUsername().isEmpty()) {
-                    throw new Error("User with this username does not exist.");
-                }  
-                }
-                
-                Incident ic = new Incident ();
+        Incident ic = new Incident ();
                 
                 i.setIncidentId(Long.MIN_VALUE);
                 i.setUsername(ic.getUsername());
@@ -81,82 +56,107 @@ public class IncidentService {
                 i.getUsername();
                 i.getUuid();
 
-         incidentRepository.save(i);
 
+        // Save the incident
+        incidentRepository.save(i);
 
-    
-        // Return success, if the new user has been created
-        // (the user variable "u" should be blank)
-        if (!requestUserCreate) {
-            return new Response(0,ServiceStatus.SUCCESS);
-        }
-    
-        Map<String, String> response = new HashMap<>();
-        response.put("username", u.getUsername());
-        response.put("password", u.getPassword());   
-        return new Response(response, ServiceStatus.SUCCESS);
-    
+        if (requestUserCreate(user)) {
+            Map<String, String> response = new HashMap<>();
+            response.put("username", user.getUsername());
+            response.put("password", user.getPassword());
+            //return new Response<>(response, ServiceStatus.SUCCESS);
+        } /*else {
+            return new Response(0, ServiceStatus.SUCCESS);
+        }*/
+       return new Response<>(0, ServiceStatus.SUCCESS);
     }
+
+    private boolean requestUserCreate(User user) {
+        return user.getUsername().contains("username") && user.getPassword().contains("password");
+    }
+
+    private User createUserIfNotExists(User user) throws NoSuchAlgorithmException {
+        User existingUser = userRepository.findByUsername(user.getUsername());
+        if (existingUser.getUsername().isEmpty()) {
+            user.setUserId(Long.MIN_VALUE);
+                        user.setUsername(existingUser.getUsername());
+                        user.setFirstName(existingUser.getFirstName());
+                        user.setLastName(existingUser.getLastName());
+                        user.setPassword(Hashing.getHashValue(existingUser.getPassword()));
+                        user.setCity(existingUser.getCity());
+                        user.setPhoneNumber(existingUser.getPhoneNumber());
+                        user.setDate(existingUser.getDate());
+                        user.setRoles(Roles.USER);
+                        user.setIncidents(existingUser.getIncidents());
+            return userRepository.save(user);
+        }
+        return existingUser;
+    }
+
+
     
     @PreAuthorize("hasRoles('USER') or hasRoles('SUPERADMIN')")   
-    public Response incidentReports(Report report, String uuid) {
+    public  Response <List<Report>> incidentReports(Report report, String uuid) {
                Incident i = incidentRepository.findByUuid(uuid);
                
-               List<Report> reports = incidentRepository.findReportsByIncident ((Incident) i.getReportIndex());
+               List<Report> reports = incidentRepository.findReportsByIncident (i.getReportIndex());
 
 
          if(report == null) {
          
-            return new Response(null, ServiceStatus.ERROR);
-
+            return new Response<>(null, ServiceStatus.ERROR);
          }
 
          reports.add(report);
 
-         return new Response(reports, ServiceStatus.SUCCESS);
+         return new Response <> (reports, ServiceStatus.SUCCESS);
 
     }
+
     
 @PreAuthorize("hasRoles('DETECTIVES') or hasRoles('SUPERADMIN')")
-public Response incidentUser(User user, String uuid) {
+public Response <User> incidentUser(User user, String uuid) {
         Incident i = incidentRepository.findByUuid(uuid);
         
         User u = incidentRepository.findUserByUsername(i.getUsername());
         
         if(u.getUsername().isEmpty()) {
 
-            return new Response(null, ServiceStatus.USER_DOES_NOT_EXIST);
+            return new Response<>(null, ServiceStatus.USER_DOES_NOT_EXIST);
     
         }
-        return new Response(u, ServiceStatus.SUCCESS);
+        return new Response<>(u, ServiceStatus.SUCCESS);
 
     }
 
     @PreAuthorize("hasRoles('DETECTIVES') or hasRoles('USER') or hasRoles('SUPERADMIN')")
-    public Response listIncidents(String uuid, String username) {
+    public Response <List<Incident>> listIncidents(String uuid, String username) {
         
         Incident ic = incidentRepository.findByUuid(uuid);
-        
-            // Fetch the reports, if the the username parameter is specified
 
-            if (!ic.getUsername().isEmpty() && !ic.getUuid().isEmpty()) {
-    
-                ic.getUuid();
-                ic.getUsername();
+        // Fetch the reports, if the the username parameter is specified
 
-                Map<String, Report> reports;
-                
-                
-                List<Report> rs = incidentRepository.findReportsByIncident ((Incident) ic.getReports());
-                    
-                ic.setReports(rs);
-                ic.setReportIndex(null);  //confused
-                
-                
+        if (!ic.getUsername().isEmpty() && !ic.getUuid().isEmpty()) {
+            /*ic.getUuid();
+            ic.getUsername();*/
+
+            //Map<String, Report> reports;
+
+            // Fetch reports related to the incident
+
+            List<Report> rs = incidentRepository.findReportsByIncident (ic.getReports());
+
+            ic.setReports(rs);
+
+            ic.setReportIndex(null);  //confused
+
             }
+
             List<Incident> incidents = incidentRepository.findIncidentByUsername(ic.getUsername());
+
             incidents.add(ic);
-            return new Response(incidents, ServiceStatus.SUCCESS);
+
+            return new Response <>(incidents, ServiceStatus.SUCCESS);
 
         }
     

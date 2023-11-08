@@ -15,12 +15,12 @@ import com.example.detective.handler.ServiceStatus;
 public class DetectiveApplication {
 	IncidentTypeRepository incidentTypeRepository;
     
-    public  Response listIncidentTypes( IncidentType incidentType) {
+    public  Response <List<IncidentType>> listIncidentTypes( IncidentType incidentType) {
 
         List<IncidentType> incidentTypes = incidentTypeRepository.findAll();
 		
         
-		return new Response(incidentTypes, ServiceStatus.SUCCESS);
+		return new Response <> (incidentTypes, ServiceStatus.SUCCESS);
 	}
 
 	public static void main(String[] args) {

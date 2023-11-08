@@ -13,7 +13,6 @@ import com.example.detective.repository.UserRepository;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 
 
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 
@@ -46,167 +44,184 @@ public class UserService {
 
 
     Random random = new Random(1000);
-	
-
-	//ModelMapper modelMapper = new ModelMapper();
-
-    //@Autowired
-	//private EmailService emailService;
 
     @Autowired
 	private OtpController otpController;
 
 
-    //@PreAuthorize("hasRole('USER') or hasRole('SUPERADMIN')")
-    public Response createUser(User user) throws NoSuchAlgorithmException {
-        User u = userRepository.findByUsername(user.getUsername());
+    @PreAuthorize("hasRole('USER') or hasRole('SUPERADMIN')")
+    public Response <Integer> createUser(User user) throws NoSuchAlgorithmException {
 
-// Check if the user already exists
-        if(u.getUsername().isEmpty()){
-            
-        // User does not exist, attempting creation
+        // Validate user input
+        if (user == null || user.getUsername() == null || user.getPassword() == null) {
+            return new Response<>(null, ServiceStatus.INVALID_INPUT);
+        }
+
+        // Check if the user already exists
+        User existingUser = userRepository.findByUsername(user.getUsername());
+        if (existingUser.getUsername().isEmpty()) {
+            return new Response <>(null, ServiceStatus.USERNAME_ALREADY_EXIST);
+        }
+
+        //User does not exist, attempting creation
+        //Set user properties and save
+        
         user.setUserId(Long.MIN_VALUE);
-        user.setUsername(u.getUsername());
-        user.setFirstName(u.getFirstName());
-        user.setLastName(u.getLastName());
-        user.setPassword(Hashing.getHashValue(u.getPassword()));
-        user.setCity(u.getCity());
-        user.setPhoneNumber(u.getPhoneNumber());
+        user.setFirstName(existingUser.getFirstName());
+        user.setLastName(existingUser.getLastName());
+        user.setPassword(Hashing.getHashValue(existingUser.getPassword()));
+        user.setCity(existingUser.getCity());
+        user.setPhoneNumber(existingUser.getPhoneNumber());
         user.setBalance(0);
         user.setFreedoms(0);
-        user.setDate(u.getDate());
-        user.setRoles(Roles.USER);
-        user.setIncidents(u.getIncidents());
-              
+        user.setDate(Instant.now());
+        user.setRoles(Roles.USER);    
+        user.setIncidents(existingUser.getIncidents());
+
+        //persist newly created user
+        
+        userRepository.save(user);
+
+        //return new Response(savedUser, ServiceStatus.SUCCESS);
 
         // Return null, if user is newly created
-            return new Response(0, ServiceStatus.SUCCESS);
-
-        }
-        userRepository.save(u);
-        
-        Map<String, String> userResponse = new HashMap<>();
-	userResponse.put("username", u.getUsername());
-	userResponse.put("password", u.getPassword());
-
-       // Return the username and the password of the already existing user
-        return new Response(userResponse, ServiceStatus.SUCCESS);
-
+        return new Response<>(0, ServiceStatus.SUCCESS);
     }
+      
+
+
     @PreAuthorize("hasRole('USER') or hasRole('SUPERADMIN')")
-    public Response updatePassword(String username, String password) throws NoSuchAlgorithmException{
-                User newUser = userRepository.findByUsername(username);
-                
-                 if(newUser == null || newUser.getUsername().isEmpty()){
-                     throw new Error("user not found");
-                 }
-                 
-                 else if (!newUser.getUsername().isEmpty()) {
-                
-                 
+    public Response <Integer> updatePassword(String username, String password) throws NoSuchAlgorithmException{
+
+        User newUser = userRepository.findByUsername(username);
+
+        // Validate user input
+
+        if (newUser == null || newUser.getUsername().isEmpty()) {
+            return new Response<>(null, ServiceStatus.USER_NOT_FOUND);
+        }
+
+        else if (!newUser.getUsername().isEmpty()) {
+            Otp otp =  otpController.getOTP(null);
+
+            newUser.setOtp(otp); 
+
+            if (otpController.verifyOTP(otp) != null) {
+
                 newUser.setDate(Instant.now());
                 newUser.setPassword(Hashing.getHashValue(password));
-                      
-                User savedUser = userRepository.save(newUser);
+
+               userRepository.save(newUser);
+
                 
-                return new Response(savedUser, ServiceStatus.SUCCESS);
-                 }
-                 return new Response(null, ServiceStatus.ERROR);
-    }
-
-    @PreAuthorize("hasRoles('USER') or hasRoles('SUPERADMIN')")
-    public Response incidents(String username, Incident i) {
-        
-        User user = userRepository.findByUsername(username);
-        
-        List<Incident> incidents = userRepository.findIncidentByUsername ((Incident) user.getIncidents());
-        
-        if (i == null){
-            
-            return null;
-
-        }
-        
-        incidents.add(i);        
-
-        return new Response(incidents, ServiceStatus.SUCCESS);
-    }
-
-    public Response authUser(String username, String password, Otp otp) {
-
-
-        User user = userRepository.findByUsername(username);
-        
-        boolean authenticated = false;
-
-        if(user.getPassword() == null){
-            authenticated = false;
-            throw new Error("Wrong passwod, you have two attempts left");
-        }
-
-        else {
-            //authenticated = user.getPassword().equals(password);
-
-            if (user.getPassword().equals(password)){
                 
-               //create otp
-                otp =  otpController.getOTP(null);
+                //return new Response("Authentication successful", ServiceStatus.SUCCESS);
 
-                //EmailService.sendEmail(username, "OTP for verification " + otp);
-
-                //user.setOtp(otp);
-
-                //User map = modelMapper.map(username, User.class);
-                user.setOtp(otp); 
-                //verify otp
-                otpController.verifyOTP(otp);
-                
-                /*if (user.getOtp() == otp) {
-
-                    authenticated = true;
-                }
-                throw new Error("OTP is Incorrect");*/
-                authenticated = user.getOtp().equals(otp);
+            } else {
+                return new Response<>(null, ServiceStatus.INVALID_OTP);
             }
         }
 
-        return new Response(authenticated, ServiceStatus.SUCCESS);
+        return new Response<>(0, ServiceStatus.SUCCESS);
+
+        //return new Response<>(null, ServiceStatus.ERROR);
+    }
+
+    //CHECK HERE
+    @PreAuthorize("hasRoles('USER') or hasRoles('SUPERADMIN')")
+    public Response <List<Incident>> incidents(String username, Incident i) {
+
+        //User user = userRepository.findByUsername(username);
+        
+        List<Incident> incidents = incidentRepository.findIncidentByUsername(username);
+        
+        if (incidents == null){
+            return new Response <> (null, ServiceStatus.INCIDENT_NOT_FOUND);
+        }
+
+        incidents.add(i);
+        
+        return new Response <> (incidents, ServiceStatus.SUCCESS);
+    }
+
+    /*
+     public Response<List<Incident>> incidents(String username, Incident i) {
+    // Fetch incidents associated with the provided username
+    List<Incident> incidents = incidentRepository.findIncidentByUsername(username);
+    
+    if (incidents == null) {
+        // Handle the case where no incidents are found for the username
+        return new Response<>(null, ServiceStatus.INCIDENT_NOT_FOUND);
+    }
+
+    // Add the new incident to the list
+    incidents.add(i);
+
+    // Return the updated list of incidents
+    return new Response<>(incidents, ServiceStatus.SUCCESS);
+}
+
+     */
+
+
+
+    public Response <Boolean> authUser(String username, String password, Otp otp) {
+
+
+        User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            return new Response <>(null, ServiceStatus.USER_NOT_FOUND);
+        }
+
+        boolean authenticated = false;
+
+        if (user.getPassword().equals(password)) {
+            otp =  otpController.getOTP(null);
+            user.setOtp(otp);
+            authenticated = (otpController.verifyOTP(otp) != null);
+
+        }
+
+        if (!authenticated) {
+            return new Response<>(null, ServiceStatus.AUTHENTICATION_FAILED);
+        }
+
+        return new Response<>(authenticated, ServiceStatus.SUCCESS);
     }
     
     
 @PreAuthorize("hasRole('DETECTIVES') or hasRole('SUPERADMIN')")
-public Response getUser(String username) {
+public Response <User> getUser(String username) {
 
     User user = userRepository.findByUsername(username);
   
     if(user.getUsername().isEmpty()){
-        return new Response(null, ServiceStatus.USER_NOT_FOUND);
+        return new Response<>(null, ServiceStatus.USER_NOT_FOUND);
     }
-    else if(!user.getUsername().isEmpty()){
+    else {
         user.getUsername();
         user.getFirstName();
         user.getLastName();
     }
-    else {
-        return new Response(null, ServiceStatus.ERROR);
-    }
-    return new Response(user, ServiceStatus.SUCCESS);
+    
+    return new Response <>(user, ServiceStatus.SUCCESS);
 }
 
 @PreAuthorize("hasRole('SUPERADMIN')")
-public Response users(Long userId) {
-    User user = userRepository.findByUserId(userId);
+public Response <ArrayList<User>> users() {
+    /*User user = userRepository.findAll();
         
         if (user.getUsername().isEmpty()){
             
-            return null;
+            return new Response (null, ServiceStatus.U);
 
-        }
+        }*/
 
 
         ArrayList<User> users = (ArrayList<User>) userRepository.findAll();        
 
-        return new Response(users, ServiceStatus.SUCCESS);
+        return new Response<>(users, ServiceStatus.SUCCESS);
 }
 
 }

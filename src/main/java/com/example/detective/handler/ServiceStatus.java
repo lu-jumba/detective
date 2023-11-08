@@ -39,7 +39,38 @@ public enum ServiceStatus {
 
     //Error
     ERROR(400, "An unknown error occurred"),
-    UNAUTHORIZED(401, "You are not authorized for this action");
+    UNAUTHORIZED(401, "You are not authorized for this action"), 
+
+
+    
+    INCIDENT_NOT_FOUND (500, "incident not found"), 
+    
+    INVALID_INPUT(501, "Incorrect password or username"), 
+    
+    INVALID_OTP(502, "otp has expired or you entered incorrect values"), 
+    
+    AUTHENTICATION_FAILED(503, "One of the values is incorrect"), 
+    
+    INVALID_REPORT_STATUS (504, "error in report status"), 
+    
+    SUPPORT_ORDER_NOT_FOUND(505, "support order not found"),
+    
+    REPORT_NOT_FOUND(506, "Report cannot be found."), 
+    
+    CHANGE_NOT_ALLOWED(507, "Cannot change the status of a non-new report."), 
+    
+    UNCOFIRMED(508, "Reporting or Investigator must first be confirmed by the detectives."), 
+    
+    STATUS_ERROR(510, "Unknown status change."), 
+    
+    LOW_BALANCE(511, "insufficient balance"), 
+    
+    INCIDENT_ERROR(512, "Could not retrieve incident."), 
+    
+    REPORT_ERROR(513, "Cannot follow up first time reports."), 
+    
+    REPORT_INCOMPLETE (514, "report is either not completed or has invalid status."), 
+    INCIDENT_TYPE_NOT_FOUND (515, "Incident Type could not be found");
 
     private final int code;
     private final String message;

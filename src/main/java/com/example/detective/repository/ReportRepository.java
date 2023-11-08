@@ -1,7 +1,6 @@
 package com.example.detective.repository;
 
 import com.example.detective.entities.Report;
-import com.example.detective.entities.User;
 import com.example.detective.entities.Incident;
 import com.example.detective.enums.ReportStatus;
 import org.springframework.data.domain.Sort;

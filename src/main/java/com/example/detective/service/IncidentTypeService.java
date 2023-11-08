@@ -21,7 +21,7 @@ public class IncidentTypeService {
     
     
     @PreAuthorize("hasRoles('DETECTIVES') or hasRoles('SUPERADMIN')")	
-    public Response createIncidentType(IncidentType incidentType){ 
+    public Response <IncidentType> createIncidentType(IncidentType incidentType){ 
        /* ContractType ct= contractTypeRepository.findByUuid(contractType.getUuid());
 
         if(ct.getUuid().isEmpty()){*/
@@ -38,52 +38,45 @@ public class IncidentTypeService {
 
         IncidentType savedIncidentType = incidentTypeRepository.save(iType);        
 
-        return new Response(savedIncidentType,ServiceStatus.SUCCESS);
+        return new Response <> (savedIncidentType,ServiceStatus.SUCCESS);
 
     }
     
     @PreAuthorize("hasRoles('DETECTIVES') or hasRoles('SUPERADMIN')")
-    public Response setActiveIncidentType(String uuid, boolean active){
-       IncidentType incidentType = incidentTypeRepository.findByUuid(uuid);
-
-
-        if(incidentType.getUuid() == null){
-            throw new Error( "Incident Type could not be found" );
+  
+    public Response<IncidentType> setActiveIncidentType(String uuid, boolean active) {
+        IncidentType incidentType = incidentTypeRepository.findByUuid(uuid);
+    
+        if (incidentType == null) {
+            return new Response<>(null, ServiceStatus.INCIDENT_TYPE_NOT_FOUND);
+        } else {
+            incidentType.setActive(active);
         }
-        
-        else {
-            incidentType.setActive(true);
-            
-
-        }
+    
         IncidentType activeIncidentType = incidentTypeRepository.save(incidentType);
-        //contractTypeRepository.save(ct);
-        return new Response(activeIncidentType,ServiceStatus.SUCCESS);
+        return new Response<>(activeIncidentType, ServiceStatus.SUCCESS);
     }
+    
 
 
     @PreAuthorize("hasRoles('DETECTIVES') or hasRoles('SUPERADMIN')")
-    public Response incidentTypes(IncidentType incidentType, String uuid){
+            
+    public Response<ArrayList<IncidentType>> incidentTypes(String uuid, IncidentType incidentType) {
         IncidentType it = incidentTypeRepository.findByIncidentTypeUuid(uuid);
-
-        boolean callingAsMerchant = true;
-	incidentType.getServiceType();
-        /*if (callingAsMerchant) {
-                    
-                 return new Response(0, ServiceStatus.SUCCESS);  
-                 
-        }*/
         
-        ArrayList <IncidentType> incidentTypes = (ArrayList <IncidentType>) incidentTypeRepository.findActiveIncidentTypes(incidentType.getUuid());
-
+        boolean callingAsMerchant = true;
+        incidentType.getServiceType();
+        
+        ArrayList<IncidentType> incidentTypes = (ArrayList<IncidentType>) incidentTypeRepository.findActiveIncidentTypes(incidentType.getUuid());
+    
         // Apply proper filtering, merchants should only see active Incidents
-         if (!callingAsMerchant || (it.getServiceType().equals(incidentType.getServiceType()) && it.equals(it.active()))) {
-		incidentTypes.add(it);
-		} 
-
-        return new Response(incidentTypes, ServiceStatus.SUCCESS);
-    }            
-
+        if (!callingAsMerchant || (it.getServiceType().equals(incidentType.getServiceType()) && it.isActive())) {
+            incidentTypes.add(it);
+        }
+    
+        return new Response<>(incidentTypes, ServiceStatus.SUCCESS);
+    }
+    
 
     
 }

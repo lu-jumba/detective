@@ -1,4 +1,4 @@
-/*package com.example.detective;
+package com.example.detective;
 
 import java.util.Date;
 
@@ -28,4 +28,4 @@ public class ScheduledTasks {
 		log.info("OTP table cleanup : completed");
 	}
 
-}*/
+}

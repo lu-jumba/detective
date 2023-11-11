@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.detective.entities.Otp;
@@ -16,6 +17,7 @@ import com.example.detective.repository.OtpRepository;
 
 
 @RestController
+@RequestMapping("/api/otp")
 public class OtpController {
 	private static Logger log = LoggerFactory.getLogger(OtpController.class);
 	@Autowired
@@ -29,7 +31,7 @@ public class OtpController {
 		return (int) Math.floor(Math.random()*(max-min+1)+min);
 	}
 
-	@GetMapping("/otp/create/{id}") //Create a OTP with the default expiry value
+	@GetMapping("/create/{id}") //Create a OTP with the default expiry value
 	public @ResponseBody Otp getOTP(@PathVariable Integer id) {
 		log.info("{} getOTP request received with id = {}", OtpController.class.getName(),id );
 		Otp otp = new Otp();
@@ -45,7 +47,7 @@ public class OtpController {
 		return otp;
 	}
 
-	@GetMapping("/otp/create/{id}/{lifetime}") //Create a OTP with a custom expiry value
+	@GetMapping("/create/{id}/{lifetime}") //Create a OTP with a custom expiry value
 	public @ResponseBody Otp getOTPWithLifetime(@PathVariable Integer id,@PathVariable Long lifetime) {
 		log.info("{} getOTP request received with id = {}", OtpController.class.getName(),id );
 		Otp otp = new Otp();
@@ -61,7 +63,7 @@ public class OtpController {
 		return otp;
 	}
 
-	@PostMapping("/otp/verify")
+	@PostMapping("/verify")
 	public @ResponseBody String verifyOTP(@RequestBody Otp otp) {
 		otpRepository.findByIdAndCode(otp.getId(),otp.getCode())
 			.ifPresentOrElse(c -> {

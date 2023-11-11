@@ -177,8 +177,8 @@ public class UserService {
         boolean authenticated = false;
 
         if (user.getPassword().equals(password)) {
-            otp =  otpController.getOTP(null);
-            user.setOtp(otp);
+            //otp =  otpController.getOTP(null);
+            //user.setOtp(otp);
             authenticated = (otpController.verifyOTP(otp) != null);
 
         }

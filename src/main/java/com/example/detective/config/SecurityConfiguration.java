@@ -33,7 +33,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         http.logout();
 
-        http.oauth2ResourceServer().jwt();
+        //http.oauth2ResourceServer().jwt();
 
         http.cors().and().csrf();
     }

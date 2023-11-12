@@ -89,9 +89,9 @@ public class User implements Serializable {
     private float freedoms;
 
     @JsonProperty(access = Access.WRITE_ONLY)
-    //@Size(min = 8, max = 32, message = "Password must be between 8 and 32 characters")
+    @Size(min = 8, max = 32, message = "Password must be between 8 and 32 characters")
     @Field(store = Store.YES)
-    //@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character")
     @Column(name = "password")
     private String password;
     

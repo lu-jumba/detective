@@ -20,6 +20,7 @@ public class ReportDto {
     private boolean supported;
     private float verifiable;
     private String fileReference;
+
     
     
     public  Long getReportId() {

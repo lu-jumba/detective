@@ -13,7 +13,6 @@ import com.example.detective.repository.ReportRepository;
 import com.example.detective.repository.IncidentRepository;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -46,7 +45,7 @@ public class ReportService {
     }
         
     @PreAuthorize("hasRoles('DETECTIVES') or hasRoles('SUPERADMIN')")
-    public Response <ArrayList<Report>> reports(String incidentUuid, ReportStatus status) {
+    public Response <List<Report>> reports(String incidentUuid, ReportStatus status) {
         
        Report report = reportRepository.findByIncidentUuid(incidentUuid);
 
@@ -56,7 +55,7 @@ public class ReportService {
         if(report.getStatus() != status && status != ReportStatus.UNKNOWN) {
             return new Response<>(null, ServiceStatus.INVALID_REPORT_STATUS);
                    }
-        ArrayList<Report> reports = (ArrayList<Report>) reportRepository.findAll();
+        List<Report> reports = reportRepository.findAll();
             return new Response <>(reports, ServiceStatus.SUCCESS);  
 
 
@@ -68,7 +67,7 @@ public Response <Integer> fileReport(User user, String incidentUuid) {
     Report report = new Report();
     report.setStatus(ReportStatus.NEW);
 
-// Check if the case exists
+// Check if the Incident exists
 Incident ic = reportRepository.findByUuid(report.getIncidentUuid());
 	if (ic == null) {
         return new Response<>(null, ServiceStatus.INCIDENT_NOT_FOUND);
@@ -81,8 +80,8 @@ Incident ic = reportRepository.findByUuid(report.getIncidentUuid());
 
     reportRepository.save(report);    
 
-	// Update the report index in the case
-	ic.setReports(Arrays.asList(report));
+	// Update the report index in the Incident
+	ic.getReportIndex().add(report);
 
     ic.getUsername();
     //report.getIncidentUuid();

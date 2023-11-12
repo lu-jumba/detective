@@ -7,7 +7,6 @@ import com.example.detective.enums.ReportStatus;
 import com.example.detective.handler.Response;
 import com.example.detective.service.ReportService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +30,10 @@ public class ReportController {
         }
 
     @GetMapping("/status/reports")
-    public ResponseEntity <Response <ArrayList<Report>>> reports(
+    public ResponseEntity <Response <List<Report>>> reports(
         @PathVariable("status") String incidentUuid, 
         @RequestParam ReportStatus status){
-            Response <ArrayList<Report>> response = reportService.reports(incidentUuid, status);
+            Response <List<Report>> response = reportService.reports(incidentUuid, status);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
 

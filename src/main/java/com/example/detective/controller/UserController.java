@@ -8,7 +8,6 @@ import com.example.detective.entities.User;
 import com.example.detective.handler.Response;
 import com.example.detective.service.UserService;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,8 +86,8 @@ public class UserController {
     
     
     @GetMapping("/userId/users")
-    public ResponseEntity <Response <ArrayList<User>>> users(){
-            Response <ArrayList<User>> response = userService.users();
+    public ResponseEntity <Response <List<User>>> users(){
+            Response <List<User>> response = userService.users();
 
             return new ResponseEntity<>(response, HttpStatus.OK);
     }  

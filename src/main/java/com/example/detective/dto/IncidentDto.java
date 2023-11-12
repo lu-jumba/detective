@@ -3,6 +3,7 @@ package com.example.detective.dto;
 import com.example.detective.entities.Report;
 import com.example.detective.entities.Info;
 import lombok.Getter;
+
 import java.util.Date;
 import java.util.List;
 

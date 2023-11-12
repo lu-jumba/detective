@@ -12,7 +12,6 @@ import com.example.detective.repository.IncidentRepository;
 import com.example.detective.repository.UserRepository;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 
 
@@ -144,25 +143,6 @@ public class UserService {
         return new Response <> (incidents, ServiceStatus.SUCCESS);
     }
 
-    /*
-     public Response<List<Incident>> incidents(String username, Incident i) {
-    // Fetch incidents associated with the provided username
-    List<Incident> incidents = incidentRepository.findIncidentByUsername(username);
-    
-    if (incidents == null) {
-        // Handle the case where no incidents are found for the username
-        return new Response<>(null, ServiceStatus.INCIDENT_NOT_FOUND);
-    }
-
-    // Add the new incident to the list
-    incidents.add(i);
-
-    // Return the updated list of incidents
-    return new Response<>(incidents, ServiceStatus.SUCCESS);
-}
-
-     */
-
 
 
     public Response <Boolean> authUser(String username, String password, Otp otp) {
@@ -209,7 +189,7 @@ public Response <User> getUser(String username) {
 }
 
 @PreAuthorize("hasRole('SUPERADMIN')")
-public Response <ArrayList<User>> users() {
+public Response <List<User>> users() {
     /*User user = userRepository.findAll();
         
         if (user.getUsername().isEmpty()){
@@ -219,7 +199,7 @@ public Response <ArrayList<User>> users() {
         }*/
 
 
-        ArrayList<User> users = (ArrayList<User>) userRepository.findAll();        
+        List<User> users = userRepository.findAll();        
 
         return new Response<>(users, ServiceStatus.SUCCESS);
 }

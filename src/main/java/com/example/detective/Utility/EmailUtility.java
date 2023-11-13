@@ -1,4 +1,4 @@
-package com.example.detective.Utility;
+/*package com.example.detective.Utility;
 
 import java.util.Date;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ public class EmailUtility {
      * @param subject
      * @param body
      */
-    public static void sendEmail(Session session, String toEmail, String subject, String body) {
+    /*public static void sendEmail(Session session, String toEmail, String subject, String body) {
         try {
             MimeMessage msg = new MimeMessage(session);
             //set message headers
@@ -47,4 +47,4 @@ public class EmailUtility {
             e.printStackTrace();
         }
     }
-}
+}*/

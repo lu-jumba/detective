@@ -46,5 +46,3 @@ build/
 *_Lucene*
 *segments*
 
-/home/adamscript/tomateto-api/com.adamscript.tomatetoapi.models.entities.Post
-/home/adamscript/tomateto-api/com.adamscript.tomatetoapi.models.entities.User

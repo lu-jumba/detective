@@ -48,17 +48,17 @@ public class UserService {
 	private OtpController otpController;
 
 
-    @PreAuthorize("hasRole('USER') or hasRole('SUPERADMIN')")
+    @PreAuthorize("hasRole('PARTICIPANT') or hasRole('SUPERADMIN')")
     public Response <Integer> createUser(User user) throws NoSuchAlgorithmException {
 
         // Validate user input
-        if (user == null || user.getUsername() == null || user.getPassword() == null) {
-            return new Response<>(null, ServiceStatus.INVALID_INPUT);
-        }
+       // if (user == null || user.getUsername() == null || user.getPassword() == null) {
+           // return new Response<>(null, ServiceStatus.INVALID_INPUT);
+        //}
 
         // Check if the user already exists
         User existingUser = userRepository.findByUsername(user.getUsername());
-        if (existingUser.getUsername().isEmpty()) {
+        if (!existingUser.getUsername().isEmpty()) {
             return new Response <>(null, ServiceStatus.USERNAME_ALREADY_EXIST);
         }
 
@@ -135,7 +135,7 @@ public class UserService {
         List<Incident> incidents = incidentRepository.findIncidentByUsername(username);
         
         if (incidents == null){
-            return new Response <> (null, ServiceStatus.INCIDENT_NOT_FOUND);
+            return new Response <> (null, ServiceStatus.INCIDENTS_NOT_FOUND);
         }
 
         incidents.add(i);

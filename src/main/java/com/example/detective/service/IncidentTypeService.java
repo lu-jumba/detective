@@ -7,6 +7,8 @@ import com.example.detective.handler.ServiceStatus;
 
 import com.example.detective.repository.IncidentTypeRepository;
 import java.util.ArrayList;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -59,15 +61,15 @@ public class IncidentTypeService {
     
 
 
-    @PreAuthorize("hasRoles('DETECTIVES') or hasRoles('SUPERADMIN')")
+    @PreAuthorize("hasRoles('USER') or hasRoles('DETECTIVES') or hasRoles('SUPERADMIN')")
             
-    public Response<ArrayList<IncidentType>> incidentTypes(String uuid, IncidentType incidentType) {
+    public Response<List<IncidentType>> incidentTypes(String uuid, IncidentType incidentType) {
         IncidentType it = incidentTypeRepository.findByIncidentTypeUuid(uuid);
         
         boolean callingAsMerchant = true;
         incidentType.getServiceType();
         
-        ArrayList<IncidentType> incidentTypes = (ArrayList<IncidentType>) incidentTypeRepository.findActiveIncidentTypes(incidentType.getUuid());
+        List<IncidentType> incidentTypes = (ArrayList<IncidentType>) incidentTypeRepository.findActiveIncidentTypes(incidentType.getUuid());
     
         // Apply proper filtering, merchants should only see active Incidents
         if (!callingAsMerchant || (it.getServiceType().equals(incidentType.getServiceType()) && it.isActive())) {

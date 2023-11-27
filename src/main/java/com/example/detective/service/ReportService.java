@@ -106,7 +106,8 @@ public Response <Report> processReport(String incidentUuid, ReportStatus status)
     report.getReportable();
     report.getVerifiable();
     ic.getUuid();
-    
+
+    // Check if altering transaction is allowed
     if((!report.isReporting() || !report.isInvestigator()) && report.getStatus() != ReportStatus.NEW) {
       return new Response<>(null, ServiceStatus.CHANGE_NOT_ALLOWED);
     }
@@ -134,15 +135,14 @@ public Response <Report> processReport(String incidentUuid, ReportStatus status)
               return new Response<>(null, ServiceStatus.INCIDENT_ERROR);
           }
 
-          // Create new follow up order.
+          // Create new suppor up order.
  
-          String reportUuid = null;
           SupportOrder supportOrder = new SupportOrder();
           supportOrder.setSupportOrderId(Long.MIN_VALUE);
           supportOrder.setIncidentUuid(report.getIncidentUuid());
           supportOrder.setInfo(ic.getInfo());
           supportOrder.setReady(false);
-          supportOrder.setReportUuid(reportUuid);
+          supportOrder.getReportUuid();
           
           
            followupOrderRepository.save(supportOrder);
@@ -269,7 +269,7 @@ public Response <Report> processReport(String incidentUuid, ReportStatus status)
     //Filter out the irrelevant reports
     if (!report.isReporting() || report.getStatus() != ReportStatus.NEW) {
         //return null;
-        return new Response<>(new ArrayList<>(), ServiceStatus.REPORT_NOT_FOUND);
+        return new Response<>(null, ServiceStatus.REPORT_NOT_FOUND);
     }
     
     Incident in = reportRepository.findByUuid(report.getIncidentUuid());

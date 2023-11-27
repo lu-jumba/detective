@@ -85,7 +85,7 @@ public class UserController {
     }
     
     
-    @GetMapping("/userId/users")
+    @GetMapping("/users")
     public ResponseEntity <Response <List<User>>> users(){
             Response <List<User>> response = userService.users();
 

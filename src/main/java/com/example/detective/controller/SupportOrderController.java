@@ -24,8 +24,7 @@ public class SupportOrderController {
     
     @GetMapping("/reportUuid/listSupportOrders")
     public ResponseEntity <Response <List<SupportOrder>>> listSupportOrders(
-        @PathVariable("reportUuid") 
-        @RequestParam String reportUuid){
+        @PathVariable("reportUuid") String reportUuid){
              Response <List<SupportOrder>> response = supportOrderService.listSupportOrders(reportUuid);
              return new ResponseEntity<>(response, HttpStatus.OK);
     }

@@ -6,7 +6,7 @@ import com.example.detective.entities.IncidentType;
 import com.example.detective.handler.Response;
 import com.example.detective.service.IncidentTypeService;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,9 +33,9 @@ public class IncidentTypeController {
     }
 
     @GetMapping("/uuid/incidentTypes")
-    public ResponseEntity <Response<ArrayList<IncidentType>>> incidentTypes(@PathVariable("uuid") String uuid,
+    public ResponseEntity <Response<List<IncidentType>>> incidentTypes(@PathVariable("uuid") String uuid,
      @RequestParam IncidentType incidentType){
-        Response<ArrayList<IncidentType>> response = incidentTypeService.incidentTypes(uuid, incidentType);
+        Response<List<IncidentType>> response = incidentTypeService.incidentTypes(uuid, incidentType);
             return new ResponseEntity<>(response, HttpStatus.OK);
         
     }

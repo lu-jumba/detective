@@ -21,7 +21,7 @@ public class ReportController {
     @Autowired
     private ReportService reportService;
 
-    @GetMapping("/case/uuid/report")
+    @GetMapping("/incident/uuid/report")
     public ResponseEntity <Response <Incident>> reportIncident(
         @PathVariable("uuid") 
         @RequestParam Report r ){
@@ -31,8 +31,8 @@ public class ReportController {
 
     @GetMapping("/status/reports")
     public ResponseEntity <Response <List<Report>>> reports(
-        @PathVariable("status") String incidentUuid, 
-        @RequestParam ReportStatus status){
+        @PathVariable("status") ReportStatus status,  
+        @RequestParam String incidentUuid ){
             Response <List<Report>> response = reportService.reports(incidentUuid, status);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
@@ -51,8 +51,8 @@ public class ReportController {
 
     
     @PutMapping ("/processReport")
-    public ResponseEntity <Response <Report>> processReport(@RequestBody String caseUuid, ReportStatus status){
-        Response <Report> response = reportService.processReport(caseUuid, status);
+    public ResponseEntity <Response <Report>> processReport(@RequestBody String incidentUuid, ReportStatus status){
+        Response <Report> response = reportService.processReport(incidentUuid, status);
         
         return switch (response.getCode()) {
             case 0 -> new ResponseEntity<>(response, HttpStatus.OK);
@@ -62,7 +62,7 @@ public class ReportController {
         };
             }
     
-    @GetMapping("/caseUuid/listReportingReports")
+    @GetMapping("/incidentUuid/listReportingReports")
         public ResponseEntity <Response <List<Report>>> listReportingReports(
             @PathVariable("incidentUuid") String incidentUuid, 
             @RequestParam ReportStatus status){
@@ -70,7 +70,7 @@ public class ReportController {
                 return new ResponseEntity<>(response, HttpStatus.OK);
                 }
 
-     @GetMapping("/caseUuid/listInvestigatorReports")
+     @GetMapping("/incidentUuid/listInvestigatorReports")
         public ResponseEntity <Response <List<Report>>> listInvestigatorReports(
             @PathVariable("incidentUuid") String incidentUuid, 
             @RequestParam ReportStatus status){
@@ -78,7 +78,7 @@ public class ReportController {
                 return new ResponseEntity<>(response, HttpStatus.OK);
                 }
 
-    @PutMapping ("/contractUuid/processScamorfraudReport")
+    @PutMapping ("/incidentUuid/processScamorfraudReport")
     public ResponseEntity <Response <Report>> processReportingReport(@RequestBody String incidentUuid, ReportStatus status, String fileReference){
         Response <Report> response = reportService.processReportingReport(incidentUuid, status, fileReference);
         
@@ -90,7 +90,7 @@ public class ReportController {
         };
             }
 
-    @PutMapping ("/contractUuid/processNeedtoknowReport")
+    @PutMapping ("/incidentUuid/processNeedtoknowReport")
     public ResponseEntity <Response <Report>> processInvestigatorReport(@RequestBody String incidentUuid, ReportStatus status, String fileReference){
         Response <Report> response = reportService.processInvestigatorReport(incidentUuid, status, fileReference);
         

@@ -70,7 +70,8 @@ public enum ServiceStatus {
     REPORT_ERROR(513, "Cannot follow up first time reports."), 
     
     REPORT_INCOMPLETE (514, "report is either not completed or has invalid status."), 
-    INCIDENT_TYPE_NOT_FOUND (515, "Incident Type could not be found");
+    INCIDENT_TYPE_NOT_FOUND (515, "Incident Type could not be found"),
+    INCIDENTS_NOT_FOUND (516, "incidents not found"), ;
 
     private final int code;
     private final String message;
